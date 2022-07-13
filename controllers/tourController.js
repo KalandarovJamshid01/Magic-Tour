@@ -11,7 +11,13 @@ const getAllTours = catchAsyncError(async (req, res) => {
     .pagination();
 
   const tours = query.databaseQuery;
-  const data = await tours;
+  const data = await tours.find().populate({
+    path: 'guides',
+    select: '-role -__v -passwordChangedDate',
+  }).populate({
+    path: "reviews",
+    select:"-__v"
+  });
   res.status(200).json({
     status: 'success',
     results: data.length,
@@ -127,6 +133,8 @@ const tourReportYear = catchAsyncError(async (req, res) => {
     data: data,
   });
 });
+
+
 
 module.exports = {
   getAllTours,

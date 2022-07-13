@@ -9,6 +9,7 @@ const helmet = require('helmet');
 const sanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const reviewRouter = require('./routes/reviewRouter');
 
 const app = express();
 
@@ -45,7 +46,7 @@ const limit = rateLimit({
   message: 'Too many requests from this IP, Please try again later',
 });
 
-app.use('/api', limit);
+// app.use('/api', limit);
 
 // app.get('/', (req, res) => {
 //   res.status(200).json({
@@ -62,6 +63,7 @@ app.use('/api', limit);
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', function (req, res, next) {
   next(new AppError(`this url has not found: ${req.originalUrl}`, 404));

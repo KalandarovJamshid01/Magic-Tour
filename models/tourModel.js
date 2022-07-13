@@ -2,6 +2,43 @@ const mongoose = require('mongoose');
 
 const tourSchema = new mongoose.Schema(
   {
+    startLocation: {
+      description: {
+        type: String,
+        required: [true, 'You must enter description'],
+      },
+      type: {
+        type: String,
+        default: 'Point',
+      },
+      coordinates: [Number],
+      address: { type: String, reuired: [true, 'You must enter address'] },
+    },
+    locations: [
+      {
+        description: {
+          type: String,
+          required: [true, 'You must enter description'],
+        },
+        type: {
+          type: String,
+          default: 'Point',
+        },
+        coordinates: [Number],
+        day: {
+          type: Number,
+          required: [true, 'You must enter day!'],
+        },
+      },
+    ],
+
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'testusers',
+      },
+    ],
+
     name: {
       type: String,
       required: [true, 'Name ni kirtishingiz shart'],
@@ -79,6 +116,11 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('haftaDavomEtish').get(function () {
   return this.duration / 7;
 });
+tourSchema.virtual('reviews', {
+  ref: 'reviews',
+  localField: 'id',
+  foreignField:"tourID"
+});
 
 tourSchema.pre('save', function (next) {
   this.name = this.name + 1;
@@ -101,7 +143,7 @@ tourSchema.post('find', function (doc, next) {
   next();
 });
 
-const Tour = mongoose.model('testtours', tourSchema);
+const Tour = mongoose.model('tours', tourSchema);
 
 module.exports = Tour;
 
