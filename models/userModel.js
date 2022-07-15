@@ -88,6 +88,6 @@ userSchema.methods.hashTokenMethod = function () {
   return token;
 };
 
-const User = mongoose.model('testusers', userSchema);
+const User = mongoose.model('users', userSchema);
 
 module.exports = User;

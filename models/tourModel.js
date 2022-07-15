@@ -35,7 +35,7 @@ const tourSchema = new mongoose.Schema(
     guides: [
       {
         type: mongoose.Schema.ObjectId,
-        ref: 'testusers',
+        ref: 'users',
       },
     ],
 
@@ -119,7 +119,7 @@ tourSchema.virtual('haftaDavomEtish').get(function () {
 tourSchema.virtual('reviews', {
   ref: 'reviews',
   localField: 'id',
-  foreignField:"tourID"
+  foreignField: 'tourID',
 });
 
 tourSchema.pre('save', function (next) {

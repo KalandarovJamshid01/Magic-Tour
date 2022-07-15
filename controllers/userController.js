@@ -48,7 +48,15 @@ const updateMe = catchErrorAsync(async (req, res, next) => {
   });
 });
 
-const updateUser = (req, res, next) => {};
+const updateUser = catchErrorAsync(async (req, res, next) => {
+  const data = await User.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  res.status(201).json({
+    status: 'success',
+    data: data,
+  });
+});
 
 const deleteMe = catchErrorAsync(async (req, res, next) => {
   //1)User update Active schema
@@ -60,12 +68,14 @@ const deleteMe = catchErrorAsync(async (req, res, next) => {
   });
 });
 
-const getUserById = (req, res) => {
-  res.status(404).json({
-    status: 'fail',
-    message: 'This route has not created yet!',
+const getUserById = catchErrorAsync(async (req, res) => {
+  const data = await User.findById(req.params.id);
+
+  res.status(200).json({
+    status: 'success',
+    data: data,
   });
-};
+});
 const deleteUser = catchErrorAsync(async (req, res, next) => {
   await User.findByIdAndDelete(req.params.id);
   res.status(200).json({
