@@ -34,7 +34,6 @@ const signup = catchErrorAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedDate: req.body.passwordChangedDate,
   });
-  console.log('salom');
   const token = createToken(newUser._id);
   saveTokenCookie(res, token);
   res.status(200).json({

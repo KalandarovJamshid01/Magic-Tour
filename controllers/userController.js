@@ -4,6 +4,7 @@ const catchErrorAsync = require('../utility/catchAsync');
 const getAllUsers = catchErrorAsync(async (req, res, next) => {
   const users = await User.find();
   res.status(200).json({
+    result: users.length,
     status: 'success',
     userInfo: req.user,
     data: users,
