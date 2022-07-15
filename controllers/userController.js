@@ -10,12 +10,13 @@ const getAllUsers = catchErrorAsync(async (req, res, next) => {
   });
 });
 
-const addUser = (req, res) => {
-  res.status(404).json({
-    status: 'fail',
-    message: 'This route has not created yet!',
+const addUser = catchErrorAsync(async (req, res) => {
+  const data = await User.create(req.body);
+  res.status(201).json({
+    status: 'success',
+    data: data,
   });
-};
+});
 
 const updateMe = catchErrorAsync(async (req, res, next) => {
   //1) user password not changed
