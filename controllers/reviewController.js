@@ -24,11 +24,22 @@ const getAllReview = catchError(async (req, res, next) => {
 });
 
 const addReview = catchError(async (req, res, next) => {
-  const review = await Review.create(req.body);
+  let reviews;
 
+  if (!req.params.id) {
+    reviews = await Review.create(req.body);
+  } else {
+    const tourId = req.params.id;
+    reviews = await Review.create({
+      review: req.body.review,
+      rating: req.body.rating,
+      tour: tourId,
+      user: req.body.user,
+    });
+  }
   res.status(200).json({
     statsu: 'success',
-    data: review,
+    data: reviews,
   });
 });
 
