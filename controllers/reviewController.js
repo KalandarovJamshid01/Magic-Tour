@@ -2,45 +2,71 @@ const Review = require('./../models/reviewModel');
 const appError = require('./../utility/appError');
 const catchError = require('./../utility/catchAsync');
 
-const getAllReview = catchError(async (req, res, next) => {
-  let reviews;
-  if (!req.params.id) {
-    reviews = await Review.find()
-      .populate({
-        path: 'user',
-        select: 'name',
-      })
-      .populate({
-        path: 'tour',
-        select: 'name',
-      });
+const {
+  getAll,
+  getOne,
+  add,
+  update,
+  deleteData,
+} = require('./handlerController');
+
+const options = {
+  path: 'tour',
+  select: 'name',
+};
+
+const options2 = {
+  path: 'user',
+  select: 'name',
+};
+
+const getAllReview = (req, res, next) => {
+  let modelReview;
+  if (req.params.id) {
+    modelReview = Review.find({ id: req.params.id });
   } else {
-    reviews = await Review.find({ tour: req.params.id });
+    modelReview = Review;
   }
-  res.status(200).json({
-    status: 'success',
-    data: reviews,
-  });
-});
+  getAll(req, res, next, modelReview, options, options2);
+};
 
-const addReview = catchError(async (req, res, next) => {
-  let reviews;
+const getOneReview = (req, res, next) => {
+  let modelReview;
+  if (req.params.id) {
+    modelReview = Review.find({ id: req.parasm.id });
+  } else {
+    modelReview = Review;
+  }
+  getOne(req, res, next, modelReview, options, options2);
+};
 
+const addReview = (req, res, next) => {
+  let modelReview;
   if (!req.params.id) {
-    reviews = await Review.create(req.body);
+    modelReview = Review;
   } else {
     const tourId = req.params.id;
-    reviews = await Review.create({
+    Review.create({
       review: req.body.review,
       rating: req.body.rating,
       tour: tourId,
       user: req.body.user,
     });
+    modelReview = Review;
   }
-  res.status(200).json({
-    statsu: 'success',
-    data: reviews,
-  });
-});
+  add(req, res, next, modelReview);
+};
 
-module.exports = { addReview, getAllReview };
+const updateReview = (req, res, next) => {
+  update(req, res, next, Review);
+};
+const deleteReview = (req, res, next) => {
+  deleteData(req, res, next, Review);
+};
+module.exports = {
+  addReview,
+  getAllReview,
+  updateReview,
+  getOneReview,
+  deleteReview,
+};

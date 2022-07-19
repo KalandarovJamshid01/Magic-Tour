@@ -18,7 +18,7 @@ const responseFunc = (res, statusCode, data) => {
 };
 
 const getAll = catchErrorAsync(
-  async (req, res, next, Model, options, options2) => {
+  async (req, res, next, Model, options, options2, dataOption) => {
     let datas;
     let filter = new FeatureApi(req.query, Model)
       .filter()
@@ -44,12 +44,14 @@ const getOne = catchErrorAsync(
     let data;
     if (options) {
       if (!options2) {
-        data = await filter.databaseQuery.populate(options);
+        data = await Model.findById(req.params.id).populate(options);
       } else {
-        data = await filter.databaseQuery.populate(options).populate(options2);
+        data = await Model.findById(req.params.id)
+          .populate(options)
+          .populate(options2);
       }
     } else {
-      data = await Model.find();
+      data = await Model.findById(req.params.id);
     }
     responseFunc(res, 200, data);
   }

@@ -1,24 +1,29 @@
 const User = require('../models/userModel');
 const catchErrorAsync = require('../utility/catchAsync');
+const {
+  getAll,
+  getOne,
+  add,
+  update,
+  deleteData,
+} = require('./handlerController');
 
-const getAllUsers = catchErrorAsync(async (req, res, next) => {
-  const users = await User.find();
-  res.status(200).json({
-    result: users.length,
-    status: 'success',
-    userInfo: req.user,
-    data: users,
-  });
-});
+const getAllUsers = (req, res, next) => {
+  getAll(req, res, next, User);
+};
+const getUserById = (req, res, next) => {
+  getOne(req, res, next, User);
+};
+const addUser = (req, res, next) => {
+  add(req, res, next, User);
+};
+const updateUser = (req, res, next) => {
+  update(req, res, next, User);
+};
 
-const addUser = catchErrorAsync(async (req, res) => {
-  const data = await User.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: data,
-  });
-});
-
+const deleteUser = (req, res, next) => {
+  deleteData(req, res, next, User);
+};
 const updateMe = catchErrorAsync(async (req, res, next) => {
   //1) user password not changed
 
@@ -50,16 +55,6 @@ const updateMe = catchErrorAsync(async (req, res, next) => {
   });
 });
 
-const updateUser = catchErrorAsync(async (req, res, next) => {
-  const data = await User.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.status(201).json({
-    status: 'success',
-    data: data,
-  });
-});
-
 const deleteMe = catchErrorAsync(async (req, res, next) => {
   //1)User update Active schema
   await User.findByIdAndUpdate(req.user.id, { active: false });
@@ -67,22 +62,6 @@ const deleteMe = catchErrorAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: null,
-  });
-});
-
-const getUserById = catchErrorAsync(async (req, res) => {
-  const data = await User.findById(req.params.id);
-
-  res.status(200).json({
-    status: 'success',
-    data: data,
-  });
-});
-const deleteUser = catchErrorAsync(async (req, res, next) => {
-  await User.findByIdAndDelete(req.params.id);
-  res.status(200).json({
-    status: 'Success',
-    message: 'User has been deleted',
   });
 });
 
