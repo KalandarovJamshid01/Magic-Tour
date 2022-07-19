@@ -118,7 +118,7 @@ tourSchema.virtual('haftaDavomEtish').get(function () {
 });
 tourSchema.virtual('reviews', {
   ref: 'reviews',
-  localField: 'id',
+  localField: '_id',
   foreignField: 'tourID',
 });
 

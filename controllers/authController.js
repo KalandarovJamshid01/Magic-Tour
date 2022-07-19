@@ -100,7 +100,7 @@ const protect = catchErrorAsync(async (req, res, next) => {
 
   const tokencha = jwt.verify(token, process.env.JWT_SECRET);
 
-  console.log(tokencha);
+  // console.log(tokencha);
   // 3) Token ichidan idni olib databasedagi userni topamiz.
   const user = await User.findById(tokencha.id);
 
@@ -116,7 +116,7 @@ const protect = catchErrorAsync(async (req, res, next) => {
   // 4) Agar parol uzgargan bulsa tokeni amal qilmasligini tekshirish
   if (user.passwordChangedDate) {
     console.log(user.passwordChangedDate.getTime() / 1000);
-    console.log(tokencha.iat);
+    // console.log(tokencha.iat);
     if (user.passwordChangedDate.getTime() / 1000 > tokencha.iat) {
       return next(
         new AppError(

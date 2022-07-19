@@ -22,6 +22,9 @@ router
   .route('/')
   .get(tourController.getAllTours)
   .post(authController.protect, tourController.addTour);
+
+router.route('/:id/reviews').get(tourController.getReviewByTour);
+
 router
   .route('/:id')
   .get(tourController.getTourById)

@@ -1,4 +1,6 @@
 const Tour = require('./../models/tourModel');
+const Review = require('./../models/reviewModel');
+
 const featureApi = require('./../utility/featureApi');
 const catchAsyncError = require('./../utility/catchAsync');
 const AppError = require('../utility/appError');
@@ -11,13 +13,16 @@ const getAllTours = catchAsyncError(async (req, res) => {
     .pagination();
 
   const tours = query.databaseQuery;
-  const data = await tours.find().populate({
-    path: 'guides',
-    select: '-role -__v -passwordChangedDate',
-  }).populate({
-    path: "reviews",
-    select:"-__v"
-  });
+  const data = await tours
+    .find()
+    .populate({
+      path: 'guides',
+      select: '-role -__v -passwordChangedDate',
+    })
+    .populate({
+      path: 'reviews',
+      select: '-__v',
+    });
   res.status(200).json({
     status: 'success',
     results: data.length,
@@ -133,8 +138,14 @@ const tourReportYear = catchAsyncError(async (req, res) => {
     data: data,
   });
 });
+const getReviewByTour = catchAsyncError(async (req, res, next) => {
+  const data = await Review.find({ tour: req.params.id });
 
-
+  res.status(200).json({
+    status: 'Success',
+  });
+  data: data;
+});
 
 module.exports = {
   getAllTours,
@@ -144,4 +155,5 @@ module.exports = {
   deleteTour,
   tourStats,
   tourReportYear,
+  getReviewByTour,
 };

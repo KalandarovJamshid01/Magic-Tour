@@ -5,11 +5,11 @@ const catchError = require('./../utility/catchAsync');
 const getAllReview = catchError(async (req, res, next) => {
   const review = await Review.find()
     .populate({
-      path: 'userID',
+      path: 'user',
       select: 'name',
     })
     .populate({
-      path: 'tourID',
+      path: 'tour',
       select: 'name',
     });
 
