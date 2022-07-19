@@ -1,7 +1,7 @@
 const express = require('express');
-const app = require('../app');
 const tourController = require('./../controllers/tourController');
 const authController = require('./../controllers/authController');
+const reviewRoutes = require('./../routes/reviewRouter');
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router
   .get(tourController.getAllTours)
   .post(authController.protect, tourController.addTour);
 
-router.route('/:id/reviews').get(tourController.getReviewByTour);
+router.use('/:id/reviews', reviewRoutes);
 
 router
   .route('/:id')

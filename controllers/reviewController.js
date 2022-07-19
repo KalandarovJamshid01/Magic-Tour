@@ -3,19 +3,23 @@ const appError = require('./../utility/appError');
 const catchError = require('./../utility/catchAsync');
 
 const getAllReview = catchError(async (req, res, next) => {
-  const review = await Review.find()
-    .populate({
-      path: 'user',
-      select: 'name',
-    })
-    .populate({
-      path: 'tour',
-      select: 'name',
-    });
-
+  let reviews;
+  if (!req.params.id) {
+    reviews = await Review.find()
+      .populate({
+        path: 'user',
+        select: 'name',
+      })
+      .populate({
+        path: 'tour',
+        select: 'name',
+      });
+  } else {
+    reviews = await Review.find({ tour: req.params.id });
+  }
   res.status(200).json({
     status: 'success',
-    data: review,
+    data: reviews,
   });
 });
 

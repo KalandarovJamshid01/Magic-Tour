@@ -139,12 +139,7 @@ const tourReportYear = catchAsyncError(async (req, res) => {
   });
 });
 const getReviewByTour = catchAsyncError(async (req, res, next) => {
-  const data = await Review.find({ tour: req.params.id });
-
-  res.status(200).json({
-    status: 'Success',
-  });
-  data: data;
+  
 });
 
 module.exports = {
