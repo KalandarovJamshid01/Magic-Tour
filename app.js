@@ -35,10 +35,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  req.time = '12.04.2022';
-  next();
-});
+// app.use((req, res, next) => {
+//   req.time = '12.04.2022';
+//   next();
+// });
 
 const limit = rateLimit({
   max: 10,
@@ -46,7 +46,7 @@ const limit = rateLimit({
   message: 'Too many requests from this IP, Please try again later',
 });
 
-// app.use('/api', limit);
+app.use('/api', limit);
 
 // app.get('/', (req, res) => {
 //   res.status(200).json({

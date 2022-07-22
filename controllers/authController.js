@@ -25,64 +25,78 @@ const saveTokenCookie = (res, token) => {
   res.cookie('jwt', token, cookieOptions);
 };
 
-const signup = catchErrorAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    photo: req.body.photo,
-    passwordConfirm: req.body.passwordConfirm,
-    passwordChangedDate: req.body.passwordChangedDate,
-  });
-  const token = createToken(newUser._id);
-  saveTokenCookie(res, token);
-  res.status(200).json({
-    status: 'success',
-    token: token,
-    data: newUser,
-  });
-});
-
-const login = catchErrorAsync(async (req, res, next) => {
-  // 1) Email bilan password borligini tekshirish
-
-  const { email, password } = { ...req.body };
-
-  if (!email || !password) {
-    return next(new AppError('Email yoki passwordni kiriting! Xato!!!', 401));
+const signup = async (req, res, next) => {
+  try {
+    const newUser = await User.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      photo: req.body.photo,
+      passwordConfirm: req.body.passwordConfirm,
+      passwordChangedDate: req.body.passwordChangedDate,
+    });
+    const token = createToken(newUser._id);
+    saveTokenCookie(res, token);
+    res.status(200).json({
+      status: 'success',
+      token: token,
+      data: newUser,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'success',
+      err: err,
+    });
   }
+};
 
-  // 2) Shunaqa odam bormi yuqmi shuni tekshirish
-  const user = await User.findOne({ email }).select('+password');
-  if (!user) {
-    return next(
-      new AppError('Bunday user mavjud emas. Iltimos royxatdan uting!', 404)
-    );
+const login = async (req, res, next) => {
+  try {
+    // 1) Email bilan password borligini tekshirish
+
+    const { email, password } = { ...req.body };
+
+    if (!email || !password) {
+      return next(new AppError('Email yoki passwordni kiriting! Xato!!!', 401));
+    }
+
+    // 2) Shunaqa odam bormi yuqmi shuni tekshirish
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return next(
+        new AppError('Bunday user mavjud emas. Iltimos royxatdan uting!', 404)
+      );
+    }
+
+    // 3) password tugri yokin notugriligini tekshirish
+    const tekshirHashga = async (oddiyPassword, hashPassword) => {
+      const tekshir = await bcrypt.compare(oddiyPassword, hashPassword);
+      return tekshir;
+    };
+
+    if (!(await tekshirHashga(password, user.password))) {
+      return next(
+        new AppError(
+          'Sizning parol yoki loginingiz xato! Iltimos qayta urinib kuring!',
+          401
+        )
+      );
+    }
+    // 4) JWT token yasab berish
+    const token = createToken(user._id);
+    saveTokenCookie(res, token);
+    // 5) Response qaytarish
+    res.status(200).json({
+      status: 'success',
+      token: token,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      err: err,
+    });
   }
-
-  // 3) password tugri yokin notugriligini tekshirish
-  const tekshirHashga = async (oddiyPassword, hashPassword) => {
-    const tekshir = await bcrypt.compare(oddiyPassword, hashPassword);
-    return tekshir;
-  };
-
-  if (!(await tekshirHashga(password, user.password))) {
-    return next(
-      new AppError(
-        'Sizning parol yoki loginingiz xato! Iltimos qayta urinib kuring!',
-        401
-      )
-    );
-  }
-  // 4) JWT token yasab berish
-  const token = createToken(user._id);
-  saveTokenCookie(res, token);
-  // 5) Response qaytarish
-  res.status(200).json({
-    status: 'success',
-    token: token,
-  });
-});
+};
 
 const protect = catchErrorAsync(async (req, res, next) => {
   // 1) Token bor yuqligini headerdan tekshirish
@@ -264,7 +278,7 @@ const updatePassword = catchErrorAsync(async (req, res, next) => {
   // 4) send JWT token
 
   const token = createToken(user._id);
-  saveTokenCookie(res, tokenJWT);
+  saveTokenCookie(res, token);
   res.status(200).json({
     status: 'success',
     token: token,
