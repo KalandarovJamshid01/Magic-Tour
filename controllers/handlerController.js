@@ -30,7 +30,10 @@ const getAll = catchErrorAsync(
       if (!options2) {
         datas = await filter.databaseQuery.populate(options);
       } else {
-        datas = await filter.databaseQuery.populate(options).populate(options2);
+        datas = await filter.databaseQuery
+          .populate(options)
+          .populate(options2)
+          .explain();
       }
     } else {
       datas = await filter.databaseQuery;

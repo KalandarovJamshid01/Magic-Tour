@@ -112,6 +112,7 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+tourSchema.index('price');
 
 tourSchema.virtual('haftaDavomEtish').get(function () {
   return this.duration / 7;

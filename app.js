@@ -9,13 +9,17 @@ const helmet = require('helmet');
 const sanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const path = require('path');
 const reviewRouter = require('./routes/reviewRouter');
-
+const pug = require('pug');
 const app = express();
 
 app.use(helmet());
 
 app.use(express.json({ limit: '10kb' }));
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(sanitize());
 
@@ -23,12 +27,9 @@ app.use(xss());
 
 app.use(hpp());
 
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, '/public')));
 
 app.use(morgan('dev'));
-
-app.use(express.static('public'));
-app.use(express.static('dev-data'));
 
 app.use((req, res, next) => {
   console.log('Hello from Middelware');
@@ -64,7 +65,9 @@ app.use('/api', limit);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
-
+app.use('/home', (req, res, next) => {
+  res.status(200).render('base');
+});
 app.all('*', function (req, res, next) {
   next(new AppError(`this url has not found: ${req.originalUrl}`, 404));
 });

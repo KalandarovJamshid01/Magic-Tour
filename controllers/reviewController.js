@@ -33,7 +33,7 @@ const getAllReview = (req, res, next) => {
 const getOneReview = (req, res, next) => {
   let modelReview;
   if (req.params.id) {
-    modelReview = Review.find({ id: req.parasm.id });
+    modelReview = Review.findOne({ id: req.parasm.id });
   } else {
     modelReview = Review;
   }

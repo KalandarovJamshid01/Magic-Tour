@@ -37,7 +37,7 @@ const updateTour = (req, res, next) => {
 
 // Delete Tour
 const deleteTour = (req, res, next) => {
-  deleteData(req, res, next, Model);
+  deleteData(req, res, next, Tour);
 };
 
 const tourStats = catchAsyncError(async (req, res) => {

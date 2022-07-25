@@ -15,20 +15,39 @@ router.use(
   tourController.getAllTours
 );
 
-router.route('/stats').get(tourController.tourStats);
-router.route('/report/:year').get(tourController.tourReportYear);
+router
+  .route('/stats')
+  .get(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    tourController.tourStats
+  );
+router
+  .route('/report/:year')
+  .get(authController.role(['admin']), tourController.tourReportYear);
 
 router
   .route('/')
   .get(tourController.getAllTours)
-  .post(authController.protect, tourController.addTour);
+  .post(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    tourController.addTour
+  );
 
 router.use('/:id/reviews', reviewRoutes);
 
 router
   .route('/:id')
   .get(tourController.getTourById)
-  .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
+  .patch(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    tourController.updateTour
+  )
+  .delete(
+    authController.role(['admin', 'lead-guide']),
+    tourController.deleteTour
+  );
 
 module.exports = router;

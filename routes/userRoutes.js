@@ -4,7 +4,7 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.route('/signup',).post(authController.signup);
+router.route('/signup').post(authController.signup);
 router.route('/signin').post(authController.login);
 
 router.route('/forgotpassword').post(authController.forgotPassword);
@@ -23,15 +23,31 @@ router
 
 router
   .route('/')
-  .get(authController.protect, userController.getAllUsers)
-  .post(authController.protect, userController.addUser);
+  .get(
+    authController.protect,
+    authController.role(['admin', 'lead-guide', 'guide']),
+    userController.getAllUsers
+  )
+  .post(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    userController.addUser
+  );
 router
   .route('/:id')
-  .get(authController.protect, userController.getUserById)
-  .patch(authController.protect, userController.updateUser)
+  .get(
+    authController.protect,
+    authController.role(['admin', 'lead-guide', 'guide']),
+    userController.getUserById
+  )
+  .patch(
+    authController.protect,
+    authController.role(['admin', 'lead-guide']),
+    userController.updateUser
+  )
   .delete(
     authController.protect,
-    authController.role(['admin', 'team-lead']),
+    authController.role(['admin', 'lead-guide']),
     userController.deleteUser
   );
 
