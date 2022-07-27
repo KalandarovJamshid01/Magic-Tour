@@ -112,7 +112,7 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
-tourSchema.index('price');
+// tourSchema.index('price');
 
 tourSchema.virtual('haftaDavomEtish').get(function () {
   return this.duration / 7;
@@ -120,7 +120,7 @@ tourSchema.virtual('haftaDavomEtish').get(function () {
 tourSchema.virtual('reviews', {
   ref: 'reviews',
   localField: '_id',
-  foreignField: 'tourID',
+  foreignField: 'tour',
 });
 
 tourSchema.pre('save', function (next) {
@@ -139,10 +139,9 @@ tourSchema.pre('findOneAndDelete', function (next) {
   next();
 });
 
-tourSchema.post('find', function (doc, next) {
-  console.log(doc);
-  next();
-});
+// tourSchema.post('find', function (doc, next) {
+//   next();
+// });
 
 const Tour = mongoose.model('tours', tourSchema);
 

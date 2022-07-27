@@ -17,7 +17,7 @@ const options = {
 
 const options2 = {
   path: 'user',
-  select: 'name',
+  select: 'name photo',
 };
 
 const getAllReview = (req, res, next) => {

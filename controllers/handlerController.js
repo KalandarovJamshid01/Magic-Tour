@@ -33,7 +33,7 @@ const getAll = catchErrorAsync(
         datas = await filter.databaseQuery
           .populate(options)
           .populate(options2)
-          .explain();
+          // .explain();
       }
     } else {
       datas = await filter.databaseQuery;
