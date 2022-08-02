@@ -22,7 +22,6 @@ const getOneTour = async (req, res, next) => {
     const data = await Tour.findById(req.params.id)
       .populate('guides')
       .populate('reviews');
-
     const reviews = await Review.find({ tour: req.params.id }).populate('user');
     console.log(reviews);
     res.status(200).render('tour', {
