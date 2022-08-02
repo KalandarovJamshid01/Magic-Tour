@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const viewRouter = require('./routes/viewRoutes');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const langRoute = require('./routes/langRoute');
 const AppError = require('./utility/appError');
 const ErrorController = require('./controllers/errorController');
 const rateLimit = require('express-rate-limit');
@@ -67,6 +68,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/langs', langRoute);
 
 app.all('*', function (req, res, next) {
   next(new AppError(`this url has not found: ${req.originalUrl}`, 404));
