@@ -1,5 +1,5 @@
 const User = require('../models/userModel');
-const catchErrorAsync = require('../utility/catchAsync');
+const catchErrorAsync = require('../utility/catchErrorAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('../utility/appError');
 const bcrypt = require('bcryptjs');
@@ -140,7 +140,6 @@ const protect = catchErrorAsync(async (req, res, next) => {
       );
     }
   }
-
   req.user = user;
   next();
 });

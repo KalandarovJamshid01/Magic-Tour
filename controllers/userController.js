@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
-const catchErrorAsync = require('../utility/catchAsync');
+const sharp = require('sharp');
+const catchErrorAsync = require('../utility/catchErrorAsync');
 const {
   getAll,
   getOne,
@@ -10,28 +11,45 @@ const {
 const multer = require('multer');
 const AppError = require('../utility/appError');
 
-const multerStorage = multer.diskStorage({
-  destination: (req, res, cb) => {
-    cb(null, 'public/img/users');
-  },
-  filename: (req, file, cb) => {
-    //user-user._id-Date.now().jpg
-    const ext = file.mimetype.split('/')[1];
-    const fileName = `user-${req.user._id}-${Date.now()}.${ext}`;
-    cb(null, fileName);
-  },
-});
+// const multerStorage = multer.diskStorage({
+//   destination: (req, res, cb) => {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: (req, file, cb) => {
+//     //user-user._id-Date.now().jpg
+//     const ext = file.mimetype.split('/')[1];
+//     const fileName = `user-${req.user._id}-${Date.now()}.${ext}`;
+//     cb(null, fileName);
+//   },
+// });
+
+const multerStorage = multer.memoryStorage();
 const filterImage = (req, file, cb) => {
-  if (file.mimitype.startsWith('image')) {
+  if (file.mimetype.split('/')[1]) {
     cb(null, true);
   } else {
-    cb(new AppError('You must upload only image format file', 400));
+    cb(new AppError('You must upload only image format file', 400), false);
   }
 };
 
-const upload = multer({});
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: filterImage,
+});
 
 const uploadUserImage = upload.single('photo');
+const resize = (req, res, next) => {
+  if (!req.file) {
+    next();
+  }
+  const ext = file.mimetype.split('/')[1];
+  const fileName = `user-${req.user._id}-${Date.now()}.${ext}`;
+  sharp({ buffer })
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg(fileName)
+    .toFile('public/img/users');
+};
 
 const getAllUsers = (req, res, next) => {
   getAll(req, res, next, User);
@@ -49,7 +67,7 @@ const updateUser = (req, res, next) => {
 const deleteUser = (req, res, next) => {
   deleteData(req, res, next, User);
 };
-const updateMe = async (req, res, next) => {
+const updateMe = catchErrorAsync(async (req, res, next) => {
   //1) user password not changed
 
   if (req.body.password || req.body.passwordConfirm) {
@@ -66,7 +84,7 @@ const updateMe = async (req, res, next) => {
   // 2) update user info
   user.name = req.body.name || user.name;
   user.email = req.body.email || user.email;
-  user.photo = req.body.photo || user.photo;
+  user.photo = req.file.filename || user.photo;
   // 3) save info into database
   const userUpdateInfo = await User.findByIdAndUpdate(req.user.id, user, {
     new: true,
@@ -78,7 +96,7 @@ const updateMe = async (req, res, next) => {
     message: 'Your data has been updated',
     data: userUpdateInfo,
   });
-};
+});
 
 const deleteMe = catchErrorAsync(async (req, res, next) => {
   //1)User update Active schema
