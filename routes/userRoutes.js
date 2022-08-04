@@ -14,8 +14,12 @@ router
   .post(authController.protect, authController.updatePassword);
 
 router
-  .route('/updateMe')
-  .patch(authController.protect, userController.updateMe);
+  .route('/updateMe/:id')
+  .patch(
+    authController.protect,
+    userController.uploadUserImage,
+    userController.updateMe
+  );
 
 router
   .route('/deleteMe')

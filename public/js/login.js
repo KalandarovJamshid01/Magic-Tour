@@ -1,8 +1,8 @@
 const enterSystem = async (email, password) => {
   try {
-    const res = await axios({
+    const res = await fetch({
       method: 'GET',
-      url: 'http://localhost:8000/api/v1/users/signin',
+      url: 'http://localhost:8000/api/v1/users/signup',
       data: {
         email: email,
         password: password,

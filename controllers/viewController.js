@@ -37,7 +37,7 @@ const login = async (req, res, next) => {
   try {
     res.status(200).render('login');
   } catch (error) {
-    console.log(error);
+    console.log(`error ${error}`);
   }
 };
 

@@ -7,6 +7,31 @@ const {
   update,
   deleteData,
 } = require('./handlerController');
+const multer = require('multer');
+const AppError = require('../utility/appError');
+
+const multerStorage = multer.diskStorage({
+  destination: (req, res, cb) => {
+    cb(null, 'public/img/users');
+  },
+  filename: (req, file, cb) => {
+    //user-user._id-Date.now().jpg
+    const ext = file.mimetype.split('/')[1];
+    const fileName = `user-${req.user._id}-${Date.now()}.${ext}`;
+    cb(null, fileName);
+  },
+});
+const filterImage = (req, file, cb) => {
+  if (file.mimitype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('You must upload only image format file', 400));
+  }
+};
+
+const upload = multer({});
+
+const uploadUserImage = upload.single('photo');
 
 const getAllUsers = (req, res, next) => {
   getAll(req, res, next, User);
@@ -24,7 +49,7 @@ const updateUser = (req, res, next) => {
 const deleteUser = (req, res, next) => {
   deleteData(req, res, next, User);
 };
-const updateMe = catchErrorAsync(async (req, res, next) => {
+const updateMe = async (req, res, next) => {
   //1) user password not changed
 
   if (req.body.password || req.body.passwordConfirm) {
@@ -53,7 +78,7 @@ const updateMe = catchErrorAsync(async (req, res, next) => {
     message: 'Your data has been updated',
     data: userUpdateInfo,
   });
-});
+};
 
 const deleteMe = catchErrorAsync(async (req, res, next) => {
   //1)User update Active schema
@@ -73,4 +98,5 @@ module.exports = {
   deleteUser,
   deleteMe,
   updateUser,
+  uploadUserImage,
 };

@@ -38,10 +38,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.use((req, res, next) => {
-//   req.time = '12.04.2022';
-//   next();
-// });
+app.use((req, res, next) => {
+  req.time = '12.04.2022';
+  next();
+});
 
 const limit = rateLimit({
   max: 10,
