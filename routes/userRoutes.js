@@ -18,6 +18,7 @@ router
   .patch(
     authController.protect,
     userController.uploadUserImage,
+    userController.resize,
     userController.updateMe
   );
 
