@@ -5,7 +5,6 @@ const Review = require('./../models/reviewModel');
 const getAllTour = async (req, res, next) => {
   try {
     const datas = await Tour.find();
-    console.log(datas);
     res.status(200).render('overview', {
       tours: datas,
     });
