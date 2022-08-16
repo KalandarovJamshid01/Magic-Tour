@@ -1,9 +1,10 @@
 const express = require('express');
+const path = require('path');
 const morgan = require('morgan');
-const viewRouter = require('./routes/viewRoutes');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
-const langRoute = require('./routes/langRoute');
+const viewRouter = require('./routes/viewRoutes');
+const reviewRouter = require('./routes/reviewRouter');
 const AppError = require('./utility/appError');
 const ErrorController = require('./controllers/errorController');
 const rateLimit = require('express-rate-limit');
@@ -11,17 +12,21 @@ const helmet = require('helmet');
 const sanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
-const path = require('path');
-const reviewRouter = require('./routes/reviewRouter');
-const pug = require('pug');
+const cookieParser = require('cookie-parser');
+const { urlencoded } = require('express');
+
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(helmet());
 
 app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ limit: '10kb' }));
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
+app.use(urlencoded({ limit: '10kb' }));
+app.use(cookieParser());
 
 app.use(sanitize());
 
@@ -29,12 +34,13 @@ app.use(xss());
 
 app.use(hpp());
 
-app.use(express.static(path.join(__dirname, '/public')));
-
 app.use(morgan('dev'));
 
+app.use(express.static('public'));
+app.use(express.static('dev-data'));
+
 app.use((req, res, next) => {
-  console.log('Hello from Middelware');
+  console.log(req.cookies);
   next();
 });
 
@@ -68,7 +74,6 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
-app.use('/api/v1/langs', langRoute);
 
 app.all('*', function (req, res, next) {
   next(new AppError(`this url has not found: ${req.originalUrl}`, 404));

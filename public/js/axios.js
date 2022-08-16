@@ -1,4 +1,5 @@
-/* axios v0.27.2 | (c) 2022 by Matt Zabriskie */
+/* axios v0.25.0 | (c) 2022 by Matt Zabriskie */
+/* axios v0.24.0 | (c) 2022 by Matt Zabriskie */
 !(function (e, t) {
   'object' == typeof exports && 'object' == typeof module
     ? (module.exports = t())
@@ -61,93 +62,61 @@
         return Object.prototype.hasOwnProperty.call(e, t);
       }),
       (n.p = ''),
-      n((n.s = 13))
+      n((n.s = 11))
     );
   })([
     function (e, t, n) {
       'use strict';
-      var r,
-        o = n(4),
-        i = Object.prototype.toString,
-        s =
-          ((r = Object.create(null)),
-          function (e) {
-            var t = i.call(e);
-            return r[t] || (r[t] = t.slice(8, -1).toLowerCase());
-          });
-      function a(e) {
-        return (
-          (e = e.toLowerCase()),
-          function (t) {
-            return s(t) === e;
-          }
-        );
+      var r = n(3),
+        o = Object.prototype.toString;
+      function i(e) {
+        return '[object Array]' === o.call(e);
       }
-      function u(e) {
-        return Array.isArray(e);
-      }
-      function c(e) {
+      function s(e) {
         return void 0 === e;
       }
-      var f = a('ArrayBuffer');
-      function l(e) {
+      function a(e) {
         return null !== e && 'object' == typeof e;
       }
-      function p(e) {
-        if ('object' !== s(e)) return !1;
+      function u(e) {
+        if ('[object Object]' !== o.call(e)) return !1;
         var t = Object.getPrototypeOf(e);
         return null === t || t === Object.prototype;
       }
-      var d = a('Date'),
-        h = a('File'),
-        m = a('Blob'),
-        v = a('FileList');
-      function y(e) {
-        return '[object Function]' === i.call(e);
+      function c(e) {
+        return '[object Function]' === o.call(e);
       }
-      var g = a('URLSearchParams');
-      function E(e, t) {
+      function f(e, t) {
         if (null != e)
-          if (('object' != typeof e && (e = [e]), u(e)))
+          if (('object' != typeof e && (e = [e]), i(e)))
             for (var n = 0, r = e.length; n < r; n++) t.call(null, e[n], n, e);
           else
             for (var o in e)
               Object.prototype.hasOwnProperty.call(e, o) &&
                 t.call(null, e[o], o, e);
       }
-      var b,
-        O =
-          ((b =
-            'undefined' != typeof Uint8Array &&
-            Object.getPrototypeOf(Uint8Array)),
-          function (e) {
-            return b && e instanceof b;
-          });
       e.exports = {
-        isArray: u,
-        isArrayBuffer: f,
+        isArray: i,
+        isArrayBuffer: function (e) {
+          return '[object ArrayBuffer]' === o.call(e);
+        },
         isBuffer: function (e) {
           return (
             null !== e &&
-            !c(e) &&
+            !s(e) &&
             null !== e.constructor &&
-            !c(e.constructor) &&
+            !s(e.constructor) &&
             'function' == typeof e.constructor.isBuffer &&
             e.constructor.isBuffer(e)
           );
         },
         isFormData: function (e) {
-          return (
-            e &&
-            (('function' == typeof FormData && e instanceof FormData) ||
-              '[object FormData]' === i.call(e) ||
-              (y(e.toString) && '[object FormData]' === e.toString()))
-          );
+          return 'undefined' != typeof FormData && e instanceof FormData;
         },
         isArrayBufferView: function (e) {
           return 'undefined' != typeof ArrayBuffer && ArrayBuffer.isView
             ? ArrayBuffer.isView(e)
-            : e && e.buffer && f(e.buffer);
+            : e && e.buffer && e.buffer instanceof ArrayBuffer;
         },
         isString: function (e) {
           return 'string' == typeof e;
@@ -155,17 +124,28 @@
         isNumber: function (e) {
           return 'number' == typeof e;
         },
-        isObject: l,
-        isPlainObject: p,
-        isUndefined: c,
-        isDate: d,
-        isFile: h,
-        isBlob: m,
-        isFunction: y,
-        isStream: function (e) {
-          return l(e) && y(e.pipe);
+        isObject: a,
+        isPlainObject: u,
+        isUndefined: s,
+        isDate: function (e) {
+          return '[object Date]' === o.call(e);
         },
-        isURLSearchParams: g,
+        isFile: function (e) {
+          return '[object File]' === o.call(e);
+        },
+        isBlob: function (e) {
+          return '[object Blob]' === o.call(e);
+        },
+        isFunction: c,
+        isStream: function (e) {
+          return a(e) && c(e.pipe);
+        },
+        isURLSearchParams: function (e) {
+          return (
+            'undefined' != typeof URLSearchParams &&
+            e instanceof URLSearchParams
+          );
+        },
         isStandardBrowserEnv: function () {
           return (
             ('undefined' == typeof navigator ||
@@ -176,25 +156,25 @@
             'undefined' != typeof document
           );
         },
-        forEach: E,
+        forEach: f,
         merge: function e() {
           var t = {};
           function n(n, r) {
-            p(t[r]) && p(n)
+            u(t[r]) && u(n)
               ? (t[r] = e(t[r], n))
-              : p(n)
-              ? (t[r] = e({}, n))
               : u(n)
+              ? (t[r] = e({}, n))
+              : i(n)
               ? (t[r] = n.slice())
               : (t[r] = n);
           }
-          for (var r = 0, o = arguments.length; r < o; r++) E(arguments[r], n);
+          for (var r = 0, o = arguments.length; r < o; r++) f(arguments[r], n);
           return t;
         },
         extend: function (e, t, n) {
           return (
-            E(t, function (t, r) {
-              e[r] = n && 'function' == typeof t ? o(t, n) : t;
+            f(t, function (t, o) {
+              e[o] = n && 'function' == typeof t ? r(t, n) : t;
             }),
             e
           );
@@ -205,183 +185,69 @@
         stripBOM: function (e) {
           return 65279 === e.charCodeAt(0) && (e = e.slice(1)), e;
         },
-        inherits: function (e, t, n, r) {
-          (e.prototype = Object.create(t.prototype, r)),
-            (e.prototype.constructor = e),
-            n && Object.assign(e.prototype, n);
-        },
-        toFlatObject: function (e, t, n) {
-          var r,
-            o,
-            i,
-            s = {};
-          t = t || {};
-          do {
-            for (o = (r = Object.getOwnPropertyNames(e)).length; o-- > 0; )
-              s[(i = r[o])] || ((t[i] = e[i]), (s[i] = !0));
-            e = Object.getPrototypeOf(e);
-          } while (e && (!n || n(e, t)) && e !== Object.prototype);
-          return t;
-        },
-        kindOf: s,
-        kindOfTest: a,
-        endsWith: function (e, t, n) {
-          (e = String(e)),
-            (void 0 === n || n > e.length) && (n = e.length),
-            (n -= t.length);
-          var r = e.indexOf(t, n);
-          return -1 !== r && r === n;
-        },
-        toArray: function (e) {
-          if (!e) return null;
-          var t = e.length;
-          if (c(t)) return null;
-          for (var n = new Array(t); t-- > 0; ) n[t] = e[t];
-          return n;
-        },
-        isTypedArray: O,
-        isFileList: v,
       };
     },
     function (e, t, n) {
       'use strict';
-      var r = n(0);
-      function o(e, t, n, r, o) {
-        Error.call(this),
-          (this.message = e),
-          (this.name = 'AxiosError'),
-          t && (this.code = t),
-          n && (this.config = n),
-          r && (this.request = r),
-          o && (this.response = o);
-      }
-      r.inherits(o, Error, {
-        toJSON: function () {
-          return {
-            message: this.message,
-            name: this.name,
-            description: this.description,
-            number: this.number,
-            fileName: this.fileName,
-            lineNumber: this.lineNumber,
-            columnNumber: this.columnNumber,
-            stack: this.stack,
-            config: this.config,
-            code: this.code,
-            status:
-              this.response && this.response.status
-                ? this.response.status
-                : null,
-          };
-        },
-      });
-      var i = o.prototype,
-        s = {};
-      [
-        'ERR_BAD_OPTION_VALUE',
-        'ERR_BAD_OPTION',
-        'ECONNABORTED',
-        'ETIMEDOUT',
-        'ERR_NETWORK',
-        'ERR_FR_TOO_MANY_REDIRECTS',
-        'ERR_DEPRECATED',
-        'ERR_BAD_RESPONSE',
-        'ERR_BAD_REQUEST',
-        'ERR_CANCELED',
-      ].forEach(function (e) {
-        s[e] = { value: e };
-      }),
-        Object.defineProperties(o, s),
-        Object.defineProperty(i, 'isAxiosError', { value: !0 }),
-        (o.from = function (e, t, n, s, a, u) {
-          var c = Object.create(i);
-          return (
-            r.toFlatObject(e, c, function (e) {
-              return e !== Error.prototype;
-            }),
-            o.call(c, e.message, t, n, s, a),
-            (c.name = e.name),
-            u && Object.assign(c, u),
-            c
-          );
-        }),
-        (e.exports = o);
-    },
-    function (e, t, n) {
-      'use strict';
-      var r = n(1);
-      function o(e) {
-        r.call(this, null == e ? 'canceled' : e, r.ERR_CANCELED),
-          (this.name = 'CanceledError');
-      }
-      n(0).inherits(o, r, { __CANCEL__: !0 }), (e.exports = o);
-    },
-    function (e, t, n) {
-      'use strict';
       var r = n(0),
-        o = n(19),
-        i = n(1),
-        s = n(6),
-        a = n(7),
-        u = { 'Content-Type': 'application/x-www-form-urlencoded' };
-      function c(e, t) {
+        o = n(17),
+        i = n(5),
+        s = { 'Content-Type': 'application/x-www-form-urlencoded' };
+      function a(e, t) {
         !r.isUndefined(e) &&
           r.isUndefined(e['Content-Type']) &&
           (e['Content-Type'] = t);
       }
-      var f,
-        l = {
-          transitional: s,
+      var u,
+        c = {
+          transitional: {
+            silentJSONParsing: !0,
+            forcedJSONParsing: !0,
+            clarifyTimeoutError: !1,
+          },
           adapter:
             (('undefined' != typeof XMLHttpRequest ||
               ('undefined' != typeof process &&
                 '[object process]' ===
                   Object.prototype.toString.call(process))) &&
-              (f = n(8)),
-            f),
+              (u = n(6)),
+            u),
           transformRequest: [
             function (e, t) {
-              if (
-                (o(t, 'Accept'),
+              return (
+                o(t, 'Accept'),
                 o(t, 'Content-Type'),
                 r.isFormData(e) ||
-                  r.isArrayBuffer(e) ||
-                  r.isBuffer(e) ||
-                  r.isStream(e) ||
-                  r.isFile(e) ||
-                  r.isBlob(e))
-              )
-                return e;
-              if (r.isArrayBufferView(e)) return e.buffer;
-              if (r.isURLSearchParams(e))
-                return (
-                  c(t, 'application/x-www-form-urlencoded;charset=utf-8'),
-                  e.toString()
-                );
-              var n,
-                i = r.isObject(e),
-                s = t && t['Content-Type'];
-              if ((n = r.isFileList(e)) || (i && 'multipart/form-data' === s)) {
-                var u = this.env && this.env.FormData;
-                return a(n ? { 'files[]': e } : e, u && new u());
-              }
-              return i || 'application/json' === s
-                ? (c(t, 'application/json'),
-                  (function (e, t, n) {
-                    if (r.isString(e))
-                      try {
-                        return (t || JSON.parse)(e), r.trim(e);
-                      } catch (e) {
-                        if ('SyntaxError' !== e.name) throw e;
-                      }
-                    return (n || JSON.stringify)(e);
-                  })(e))
-                : e;
+                r.isArrayBuffer(e) ||
+                r.isBuffer(e) ||
+                r.isStream(e) ||
+                r.isFile(e) ||
+                r.isBlob(e)
+                  ? e
+                  : r.isArrayBufferView(e)
+                  ? e.buffer
+                  : r.isURLSearchParams(e)
+                  ? (a(t, 'application/x-www-form-urlencoded;charset=utf-8'),
+                    e.toString())
+                  : r.isObject(e) ||
+                    (t && 'application/json' === t['Content-Type'])
+                  ? (a(t, 'application/json'),
+                    (function (e, t, n) {
+                      if (r.isString(e))
+                        try {
+                          return (t || JSON.parse)(e), r.trim(e);
+                        } catch (e) {
+                          if ('SyntaxError' !== e.name) throw e;
+                        }
+                      return (n || JSON.stringify)(e);
+                    })(e))
+                  : e
+              );
             },
           ],
           transformResponse: [
             function (e) {
-              var t = this.transitional || l.transitional,
+              var t = this.transitional || c.transitional,
                 n = t && t.silentJSONParsing,
                 o = t && t.forcedJSONParsing,
                 s = !n && 'json' === this.responseType;
@@ -391,13 +257,7 @@
                 } catch (e) {
                   if (s) {
                     if ('SyntaxError' === e.name)
-                      throw i.from(
-                        e,
-                        i.ERR_BAD_RESPONSE,
-                        this,
-                        null,
-                        this.response
-                      );
+                      throw i(e, this, 'E_JSON_PARSE');
                     throw e;
                   }
                 }
@@ -409,19 +269,29 @@
           xsrfHeaderName: 'X-XSRF-TOKEN',
           maxContentLength: -1,
           maxBodyLength: -1,
-          env: { FormData: n(27) },
           validateStatus: function (e) {
             return e >= 200 && e < 300;
           },
           headers: { common: { Accept: 'application/json, text/plain, */*' } },
         };
       r.forEach(['delete', 'get', 'head'], function (e) {
-        l.headers[e] = {};
+        c.headers[e] = {};
       }),
         r.forEach(['post', 'put', 'patch'], function (e) {
-          l.headers[e] = r.merge(u);
+          c.headers[e] = r.merge(s);
         }),
-        (e.exports = l);
+        (e.exports = c);
+    },
+    function (e, t, n) {
+      'use strict';
+      function r(e) {
+        this.message = e;
+      }
+      (r.prototype.toString = function () {
+        return 'Cancel' + (this.message ? ': ' + this.message : '');
+      }),
+        (r.prototype.__CANCEL__ = !0),
+        (e.exports = r);
     },
     function (e, t, n) {
       'use strict';
@@ -474,205 +344,180 @@
     },
     function (e, t, n) {
       'use strict';
-      e.exports = {
-        silentJSONParsing: !0,
-        forcedJSONParsing: !0,
-        clarifyTimeoutError: !1,
-      };
-    },
-    function (e, t, n) {
-      'use strict';
-      var r = n(0);
-      e.exports = function (e, t) {
-        t = t || new FormData();
-        var n = [];
-        function o(e) {
-          return null === e
-            ? ''
-            : r.isDate(e)
-            ? e.toISOString()
-            : r.isArrayBuffer(e) || r.isTypedArray(e)
-            ? 'function' == typeof Blob
-              ? new Blob([e])
-              : Buffer.from(e)
-            : e;
-        }
+      e.exports = function (e, t, n, r, o) {
         return (
-          (function e(i, s) {
-            if (r.isPlainObject(i) || r.isArray(i)) {
-              if (-1 !== n.indexOf(i))
-                throw Error('Circular reference detected in ' + s);
-              n.push(i),
-                r.forEach(i, function (n, i) {
-                  if (!r.isUndefined(n)) {
-                    var a,
-                      u = s ? s + '.' + i : i;
-                    if (n && !s && 'object' == typeof n)
-                      if (r.endsWith(i, '{}')) n = JSON.stringify(n);
-                      else if (r.endsWith(i, '[]') && (a = r.toArray(n)))
-                        return void a.forEach(function (e) {
-                          !r.isUndefined(e) && t.append(u, o(e));
-                        });
-                    e(n, u);
-                  }
-                }),
-                n.pop();
-            } else t.append(s, o(i));
-          })(e),
-          t
+          (e.config = t),
+          n && (e.code = n),
+          (e.request = r),
+          (e.response = o),
+          (e.isAxiosError = !0),
+          (e.toJSON = function () {
+            return {
+              message: this.message,
+              name: this.name,
+              description: this.description,
+              number: this.number,
+              fileName: this.fileName,
+              lineNumber: this.lineNumber,
+              columnNumber: this.columnNumber,
+              stack: this.stack,
+              config: this.config,
+              code: this.code,
+              status:
+                this.response && this.response.status
+                  ? this.response.status
+                  : null,
+            };
+          }),
+          e
         );
       };
     },
     function (e, t, n) {
       'use strict';
       var r = n(0),
-        o = n(20),
-        i = n(21),
-        s = n(5),
-        a = n(9),
-        u = n(24),
-        c = n(25),
-        f = n(6),
+        o = n(18),
+        i = n(19),
+        s = n(4),
+        a = n(20),
+        u = n(23),
+        c = n(24),
+        f = n(7),
         l = n(1),
-        p = n(2),
-        d = n(26);
+        p = n(2);
       e.exports = function (e) {
         return new Promise(function (t, n) {
-          var h,
-            m = e.data,
-            v = e.headers,
-            y = e.responseType;
-          function g() {
-            e.cancelToken && e.cancelToken.unsubscribe(h),
-              e.signal && e.signal.removeEventListener('abort', h);
+          var d,
+            h = e.data,
+            m = e.headers,
+            v = e.responseType;
+          function y() {
+            e.cancelToken && e.cancelToken.unsubscribe(d),
+              e.signal && e.signal.removeEventListener('abort', d);
           }
-          r.isFormData(m) &&
-            r.isStandardBrowserEnv() &&
-            delete v['Content-Type'];
-          var E = new XMLHttpRequest();
+          r.isFormData(h) && delete m['Content-Type'];
+          var g = new XMLHttpRequest();
           if (e.auth) {
             var b = e.auth.username || '',
-              O = e.auth.password
+              x = e.auth.password
                 ? unescape(encodeURIComponent(e.auth.password))
                 : '';
-            v.Authorization = 'Basic ' + btoa(b + ':' + O);
+            m.Authorization = 'Basic ' + btoa(b + ':' + x);
           }
-          var x = a(e.baseURL, e.url);
-          function w() {
-            if (E) {
+          var w = a(e.baseURL, e.url);
+          function E() {
+            if (g) {
               var r =
-                  'getAllResponseHeaders' in E
-                    ? u(E.getAllResponseHeaders())
+                  'getAllResponseHeaders' in g
+                    ? u(g.getAllResponseHeaders())
                     : null,
                 i = {
                   data:
-                    y && 'text' !== y && 'json' !== y
-                      ? E.response
-                      : E.responseText,
-                  status: E.status,
-                  statusText: E.statusText,
+                    v && 'text' !== v && 'json' !== v
+                      ? g.response
+                      : g.responseText,
+                  status: g.status,
+                  statusText: g.statusText,
                   headers: r,
                   config: e,
-                  request: E,
+                  request: g,
                 };
               o(
                 function (e) {
-                  t(e), g();
+                  t(e), y();
                 },
                 function (e) {
-                  n(e), g();
+                  n(e), y();
                 },
                 i
               ),
-                (E = null);
+                (g = null);
             }
           }
           if (
-            (E.open(
+            (g.open(
               e.method.toUpperCase(),
-              s(x, e.params, e.paramsSerializer),
+              s(w, e.params, e.paramsSerializer),
               !0
             ),
-            (E.timeout = e.timeout),
-            'onloadend' in E
-              ? (E.onloadend = w)
-              : (E.onreadystatechange = function () {
-                  E &&
-                    4 === E.readyState &&
-                    (0 !== E.status ||
-                      (E.responseURL &&
-                        0 === E.responseURL.indexOf('file:'))) &&
-                    setTimeout(w);
+            (g.timeout = e.timeout),
+            'onloadend' in g
+              ? (g.onloadend = E)
+              : (g.onreadystatechange = function () {
+                  g &&
+                    4 === g.readyState &&
+                    (0 !== g.status ||
+                      (g.responseURL &&
+                        0 === g.responseURL.indexOf('file:'))) &&
+                    setTimeout(E);
                 }),
-            (E.onabort = function () {
-              E &&
-                (n(new l('Request aborted', l.ECONNABORTED, e, E)), (E = null));
+            (g.onabort = function () {
+              g && (n(f('Request aborted', e, 'ECONNABORTED', g)), (g = null));
             }),
-            (E.onerror = function () {
-              n(new l('Network Error', l.ERR_NETWORK, e, E, E)), (E = null);
+            (g.onerror = function () {
+              n(f('Network Error', e, null, g)), (g = null);
             }),
-            (E.ontimeout = function () {
+            (g.ontimeout = function () {
               var t = e.timeout
                   ? 'timeout of ' + e.timeout + 'ms exceeded'
                   : 'timeout exceeded',
-                r = e.transitional || f;
+                r = e.transitional || l.transitional;
               e.timeoutErrorMessage && (t = e.timeoutErrorMessage),
                 n(
-                  new l(
+                  f(
                     t,
-                    r.clarifyTimeoutError ? l.ETIMEDOUT : l.ECONNABORTED,
                     e,
-                    E
+                    r.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
+                    g
                   )
                 ),
-                (E = null);
+                (g = null);
             }),
             r.isStandardBrowserEnv())
           ) {
-            var R =
-              (e.withCredentials || c(x)) && e.xsrfCookieName
+            var S =
+              (e.withCredentials || c(w)) && e.xsrfCookieName
                 ? i.read(e.xsrfCookieName)
                 : void 0;
-            R && (v[e.xsrfHeaderName] = R);
+            S && (m[e.xsrfHeaderName] = S);
           }
-          'setRequestHeader' in E &&
-            r.forEach(v, function (e, t) {
-              void 0 === m && 'content-type' === t.toLowerCase()
-                ? delete v[t]
-                : E.setRequestHeader(t, e);
+          'setRequestHeader' in g &&
+            r.forEach(m, function (e, t) {
+              void 0 === h && 'content-type' === t.toLowerCase()
+                ? delete m[t]
+                : g.setRequestHeader(t, e);
             }),
             r.isUndefined(e.withCredentials) ||
-              (E.withCredentials = !!e.withCredentials),
-            y && 'json' !== y && (E.responseType = e.responseType),
+              (g.withCredentials = !!e.withCredentials),
+            v && 'json' !== v && (g.responseType = e.responseType),
             'function' == typeof e.onDownloadProgress &&
-              E.addEventListener('progress', e.onDownloadProgress),
+              g.addEventListener('progress', e.onDownloadProgress),
             'function' == typeof e.onUploadProgress &&
-              E.upload &&
-              E.upload.addEventListener('progress', e.onUploadProgress),
+              g.upload &&
+              g.upload.addEventListener('progress', e.onUploadProgress),
             (e.cancelToken || e.signal) &&
-              ((h = function (e) {
-                E &&
-                  (n(!e || (e && e.type) ? new p() : e), E.abort(), (E = null));
+              ((d = function (e) {
+                g &&
+                  (n(!e || (e && e.type) ? new p('canceled') : e),
+                  g.abort(),
+                  (g = null));
               }),
-              e.cancelToken && e.cancelToken.subscribe(h),
+              e.cancelToken && e.cancelToken.subscribe(d),
               e.signal &&
                 (e.signal.aborted
-                  ? h()
-                  : e.signal.addEventListener('abort', h))),
-            m || (m = null);
-          var S = d(x);
-          S && -1 === ['http', 'https', 'file'].indexOf(S)
-            ? n(new l('Unsupported protocol ' + S + ':', l.ERR_BAD_REQUEST, e))
-            : E.send(m);
+                  ? d()
+                  : e.signal.addEventListener('abort', d))),
+            h || (h = null),
+            g.send(h);
         });
       };
     },
     function (e, t, n) {
       'use strict';
-      var r = n(22),
-        o = n(23);
-      e.exports = function (e, t) {
-        return e && !r(t) ? o(e, t) : t;
+      var r = n(5);
+      e.exports = function (e, t, n, o, i) {
+        var s = new Error(e);
+        return r(s, t, n, o, i);
       };
     },
     function (e, t, n) {
@@ -736,7 +581,6 @@
           decompress: a,
           maxContentLength: a,
           maxBodyLength: a,
-          beforeRedirect: a,
           transport: a,
           httpAgent: a,
           httpsAgent: a,
@@ -756,17 +600,17 @@
       };
     },
     function (e, t) {
-      e.exports = { version: '0.27.2' };
+      e.exports = { version: '0.24.0' };
     },
     function (e, t, n) {
-      e.exports = n(14);
+      e.exports = n(12);
     },
     function (e, t, n) {
       'use strict';
       var r = n(0),
-        o = n(4),
-        i = n(15),
-        s = n(11);
+        o = n(3),
+        i = n(13),
+        s = n(9);
       var a = (function e(t) {
         var n = new i(t),
           a = o(i.prototype.request, n);
@@ -778,126 +622,115 @@
           }),
           a
         );
-      })(n(3));
+      })(n(1));
       (a.Axios = i),
-        (a.CanceledError = n(2)),
-        (a.CancelToken = n(29)),
-        (a.isCancel = n(10)),
-        (a.VERSION = n(12).version),
-        (a.toFormData = n(7)),
-        (a.AxiosError = n(1)),
-        (a.Cancel = a.CanceledError),
+        (a.Cancel = n(2)),
+        (a.CancelToken = n(26)),
+        (a.isCancel = n(8)),
+        (a.VERSION = n(10).version),
         (a.all = function (e) {
           return Promise.all(e);
         }),
-        (a.spread = n(30)),
-        (a.isAxiosError = n(31)),
+        (a.spread = n(27)),
+        (a.isAxiosError = n(28)),
         (e.exports = a),
         (e.exports.default = a);
     },
     function (e, t, n) {
       'use strict';
       var r = n(0),
-        o = n(5),
-        i = n(16),
-        s = n(17),
-        a = n(11),
-        u = n(9),
-        c = n(28),
-        f = c.validators;
-      function l(e) {
+        o = n(4),
+        i = n(14),
+        s = n(15),
+        a = n(9),
+        u = n(25),
+        c = u.validators;
+      function f(e) {
         (this.defaults = e),
           (this.interceptors = { request: new i(), response: new i() });
       }
-      (l.prototype.request = function (e, t) {
-        'string' == typeof e ? ((t = t || {}).url = e) : (t = e || {}),
-          (t = a(this.defaults, t)).method
-            ? (t.method = t.method.toLowerCase())
+      (f.prototype.request = function (e) {
+        'string' == typeof e
+          ? ((e = arguments[1] || {}).url = arguments[0])
+          : (e = e || {}),
+          (e = a(this.defaults, e)).method
+            ? (e.method = e.method.toLowerCase())
             : this.defaults.method
-            ? (t.method = this.defaults.method.toLowerCase())
-            : (t.method = 'get');
-        var n = t.transitional;
-        void 0 !== n &&
-          c.assertOptions(
-            n,
+            ? (e.method = this.defaults.method.toLowerCase())
+            : (e.method = 'get');
+        var t = e.transitional;
+        void 0 !== t &&
+          u.assertOptions(
+            t,
             {
-              silentJSONParsing: f.transitional(f.boolean),
-              forcedJSONParsing: f.transitional(f.boolean),
-              clarifyTimeoutError: f.transitional(f.boolean),
+              silentJSONParsing: c.transitional(c.boolean),
+              forcedJSONParsing: c.transitional(c.boolean),
+              clarifyTimeoutError: c.transitional(c.boolean),
             },
             !1
           );
-        var r = [],
-          o = !0;
-        this.interceptors.request.forEach(function (e) {
-          ('function' == typeof e.runWhen && !1 === e.runWhen(t)) ||
-            ((o = o && e.synchronous), r.unshift(e.fulfilled, e.rejected));
+        var n = [],
+          r = !0;
+        this.interceptors.request.forEach(function (t) {
+          ('function' == typeof t.runWhen && !1 === t.runWhen(e)) ||
+            ((r = r && t.synchronous), n.unshift(t.fulfilled, t.rejected));
         });
-        var i,
-          u = [];
+        var o,
+          i = [];
         if (
           (this.interceptors.response.forEach(function (e) {
-            u.push(e.fulfilled, e.rejected);
+            i.push(e.fulfilled, e.rejected);
           }),
-          !o)
+          !r)
         ) {
-          var l = [s, void 0];
+          var f = [s, void 0];
           for (
-            Array.prototype.unshift.apply(l, r),
-              l = l.concat(u),
-              i = Promise.resolve(t);
-            l.length;
+            Array.prototype.unshift.apply(f, n),
+              f = f.concat(i),
+              o = Promise.resolve(e);
+            f.length;
 
           )
-            i = i.then(l.shift(), l.shift());
-          return i;
+            o = o.then(f.shift(), f.shift());
+          return o;
         }
-        for (var p = t; r.length; ) {
-          var d = r.shift(),
-            h = r.shift();
+        for (var l = e; n.length; ) {
+          var p = n.shift(),
+            d = n.shift();
           try {
-            p = d(p);
+            l = p(l);
           } catch (e) {
-            h(e);
+            d(e);
             break;
           }
         }
         try {
-          i = s(p);
+          o = s(l);
         } catch (e) {
           return Promise.reject(e);
         }
-        for (; u.length; ) i = i.then(u.shift(), u.shift());
-        return i;
+        for (; i.length; ) o = o.then(i.shift(), i.shift());
+        return o;
       }),
-        (l.prototype.getUri = function (e) {
-          e = a(this.defaults, e);
-          var t = u(e.baseURL, e.url);
-          return o(t, e.params, e.paramsSerializer);
+        (f.prototype.getUri = function (e) {
+          return (
+            (e = a(this.defaults, e)),
+            o(e.url, e.params, e.paramsSerializer).replace(/^\?/, '')
+          );
         }),
         r.forEach(['delete', 'get', 'head', 'options'], function (e) {
-          l.prototype[e] = function (t, n) {
+          f.prototype[e] = function (t, n) {
             return this.request(
               a(n || {}, { method: e, url: t, data: (n || {}).data })
             );
           };
         }),
         r.forEach(['post', 'put', 'patch'], function (e) {
-          function t(t) {
-            return function (n, r, o) {
-              return this.request(
-                a(o || {}, {
-                  method: e,
-                  headers: t ? { 'Content-Type': 'multipart/form-data' } : {},
-                  url: n,
-                  data: r,
-                })
-              );
-            };
-          }
-          (l.prototype[e] = t()), (l.prototype[e + 'Form'] = t(!0));
+          f.prototype[e] = function (t, n, r) {
+            return this.request(a(r || {}, { method: e, url: t, data: n }));
+          };
         }),
-        (e.exports = l);
+        (e.exports = f);
     },
     function (e, t, n) {
       'use strict';
@@ -929,16 +762,16 @@
     function (e, t, n) {
       'use strict';
       var r = n(0),
-        o = n(18),
-        i = n(10),
-        s = n(3),
+        o = n(16),
+        i = n(8),
+        s = n(1),
         a = n(2);
       function u(e) {
         if (
           (e.cancelToken && e.cancelToken.throwIfRequested(),
           e.signal && e.signal.aborted)
         )
-          throw new a();
+          throw new a('canceled');
       }
       e.exports = function (e) {
         return (
@@ -986,7 +819,7 @@
     function (e, t, n) {
       'use strict';
       var r = n(0),
-        o = n(3);
+        o = n(1);
       e.exports = function (e, t, n) {
         var i = this || o;
         return (
@@ -1010,17 +843,15 @@
     },
     function (e, t, n) {
       'use strict';
-      var r = n(1);
+      var r = n(7);
       e.exports = function (e, t, n) {
         var o = n.config.validateStatus;
         n.status && o && !o(n.status)
           ? t(
-              new r(
+              r(
                 'Request failed with status code ' + n.status,
-                [r.ERR_BAD_REQUEST, r.ERR_BAD_RESPONSE][
-                  Math.floor(n.status / 100) - 4
-                ],
                 n.config,
+                null,
                 n.request,
                 n
               )
@@ -1062,8 +893,16 @@
     },
     function (e, t, n) {
       'use strict';
+      var r = n(21),
+        o = n(22);
+      e.exports = function (e, t) {
+        return e && !r(t) ? o(e, t) : t;
+      };
+    },
+    function (e, t, n) {
+      'use strict';
       e.exports = function (e) {
-        return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(e);
+        return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(e);
       };
     },
     function (e, t, n) {
@@ -1162,29 +1001,18 @@
     },
     function (e, t, n) {
       'use strict';
-      e.exports = function (e) {
-        var t = /^([-+\w]{1,25})(:?\/\/|:)/.exec(e);
-        return (t && t[1]) || '';
-      };
-    },
-    function (e, t) {
-      e.exports = null;
-    },
-    function (e, t, n) {
-      'use strict';
-      var r = n(12).version,
-        o = n(1),
-        i = {};
+      var r = n(10).version,
+        o = {};
       ['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(
         function (e, t) {
-          i[e] = function (n) {
+          o[e] = function (n) {
             return typeof n === e || 'a' + (t < 1 ? 'n ' : ' ') + e;
           };
         }
       );
-      var s = {};
-      (i.transitional = function (e, t, n) {
-        function i(e, t) {
+      var i = {};
+      (o.transitional = function (e, t, n) {
+        function o(e, t) {
           return (
             '[Axios v' +
             r +
@@ -1195,48 +1023,41 @@
             (n ? '. ' + n : '')
           );
         }
-        return function (n, r, a) {
+        return function (n, r, s) {
           if (!1 === e)
-            throw new o(
-              i(r, ' has been removed' + (t ? ' in ' + t : '')),
-              o.ERR_DEPRECATED
-            );
+            throw new Error(o(r, ' has been removed' + (t ? ' in ' + t : '')));
           return (
             t &&
-              !s[r] &&
-              ((s[r] = !0),
+              !i[r] &&
+              ((i[r] = !0),
               console.warn(
-                i(
+                o(
                   r,
                   ' has been deprecated since v' +
                     t +
                     ' and will be removed in the near future'
                 )
               )),
-            !e || e(n, r, a)
+            !e || e(n, r, s)
           );
         };
       }),
         (e.exports = {
           assertOptions: function (e, t, n) {
             if ('object' != typeof e)
-              throw new o('options must be an object', o.ERR_BAD_OPTION_VALUE);
-            for (var r = Object.keys(e), i = r.length; i-- > 0; ) {
-              var s = r[i],
-                a = t[s];
-              if (a) {
-                var u = e[s],
-                  c = void 0 === u || a(u, s, e);
-                if (!0 !== c)
-                  throw new o(
-                    'option ' + s + ' must be ' + c,
-                    o.ERR_BAD_OPTION_VALUE
-                  );
-              } else if (!0 !== n)
-                throw new o('Unknown option ' + s, o.ERR_BAD_OPTION);
+              throw new TypeError('options must be an object');
+            for (var r = Object.keys(e), o = r.length; o-- > 0; ) {
+              var i = r[o],
+                s = t[i];
+              if (s) {
+                var a = e[i],
+                  u = void 0 === a || s(a, i, e);
+                if (!0 !== u)
+                  throw new TypeError('option ' + i + ' must be ' + u);
+              } else if (!0 !== n) throw Error('Unknown option ' + i);
             }
           },
-          validators: i,
+          validators: o,
         });
     },
     function (e, t, n) {
@@ -1311,9 +1132,8 @@
     },
     function (e, t, n) {
       'use strict';
-      var r = n(0);
       e.exports = function (e) {
-        return r.isObject(e) && !0 === e.isAxiosError;
+        return 'object' == typeof e && !0 === e.isAxiosError;
       };
     },
   ]);

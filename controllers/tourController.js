@@ -1,44 +1,19 @@
 const Tour = require('./../models/tourModel');
-
 const catchAsyncError = require('./../utility/catchAsync');
+
 const {
-  getAll,
+  deleteOne,
+  updateOne,
+  addOne,
   getOne,
-  add,
-  update,
-  deleteData,
+  getAll,
 } = require('./handlerController');
 
-const options = {
-  path: 'guides',
-  select: '-role -_id -passwordChangedDate',
-};
-const options2 = {
-  path: 'reviews',
-};
-
-const getAllTours = (req, res, next) => {
-  getAll(req, res, next, Tour, options, options2);
-};
-
-// Get Tour by Id
-const getTourById = (req, res, next) => {
-  getOne(req, res, next, Tour, options, options2);
-};
-// Add Tour
-const addTour = (req, res, next) => {
-  add(req, res, next, Tour);
-};
-
-// Update Tour
-const updateTour = (req, res, next) => {
-  update(req, res, next, Tour);
-};
-
-// Delete Tour
-const deleteTour = (req, res, next) => {
-  deleteData(req, res, next, Tour);
-};
+const getAllTours = getAll(Tour);
+const getTourById = getOne(Tour, 'reviews');
+const addTour = addOne(Tour);
+const updateTour = updateOne(Tour);
+const deleteTour = deleteOne(Tour);
 
 const tourStats = catchAsyncError(async (req, res) => {
   const data = await Tour.aggregate([

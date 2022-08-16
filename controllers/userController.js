@@ -1,109 +1,156 @@
 const User = require('../models/userModel');
-const sharp = require('sharp');
-const catchErrorAsync = require('../utility/catchErrorAsync');
-const {
-  getAll,
-  getOne,
-  add,
-  update,
-  deleteData,
-} = require('./handlerController');
-const multer = require('multer');
+const catchErrorAsync = require('../utility/catchAsync');
+const bcrypt = require('bcryptjs');
 const AppError = require('../utility/appError');
+const authController = require('./authController');
+const multer = require('multer');
+const sharp = require('sharp');
+const {
+  deleteOne,
+  updateOne,
+  addOne,
+  getOne,
+  getAll,
+} = require('./handlerController');
 
 // const multerStorage = multer.diskStorage({
-//   destination: (req, res, cb) => {
-//     cb(null, 'public/img/users');
+//   destination: (req, file, cb) => {
+//     cb(null, 'public/img/users/');
 //   },
 //   filename: (req, file, cb) => {
-//     //user-user._id-Date.now().jpg
+//     // user-23482348032984-423423243
 //     const ext = file.mimetype.split('/')[1];
-//     const fileName = `user-${req.user._id}-${Date.now()}.${ext}`;
-//     cb(null, fileName);
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
 //   },
 // });
 
 const multerStorage = multer.memoryStorage();
-const filterImage = (req, file, cb) => {
-  if (file.mimetype.split('/')[1]) {
-    cb(null, true);
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    return cb(null, true);
   } else {
-    cb(new AppError('You must upload only image format file', 400), false);
+    return cb(new AppError('You only upload images!', 400));
   }
 };
 
 const upload = multer({
   storage: multerStorage,
-  fileFilter: filterImage,
+  fileFilter: multerFilter,
 });
 
-const uploadUserImage = upload.single('photo');
+const uploadImage = upload.single('photo');
+
 const resize = (req, res, next) => {
+  console.log('sddfsfsf:' + req.file);
   if (!req.file) {
-    next();
+    return next();
   }
-  const ext = req.file.mimetype.split('/')[1];
-  req.file.filename = `user-${req.user._id}-${Date.now()}.${ext}`;
+  console.log('Hello');
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
   sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat('jpeg')
     .jpeg()
-    .toFile(`${__dirname}/../public/img/users/${req.file.filename}`);
+    .toFile('public/img/users');
   next();
 };
 
-const getAllUsers = (req, res, next) => {
-  getAll(req, res, next, User);
-};
-const getUserById = (req, res, next) => {
-  getOne(req, res, next, User);
-};
-const addUser = (req, res, next) => {
-  add(req, res, next, User);
-};
-const updateUser = (req, res, next) => {
-  update(req, res, next, User);
-};
+const getAllUsers = getAll(User);
+const getUserById = getOne(User);
+const addUser = addOne(User);
+const updateUser = updateOne(User);
+const deleteUser = deleteOne(User);
 
-const deleteUser = (req, res, next) => {
-  deleteData(req, res, next, User);
-};
-const updateMe = catchErrorAsync(async (req, res, next) => {
-  //1) user password not changed
+const updateMePassword = catchErrorAsync(async (req, res, next) => {
+  // 1) Eski parolni tekshirishib kuramiz
+  console.log(req.user);
+  if (req.body.oldPassword == req.body.newPassword) {
+    return next(
+      new AppError('Yangi va eski parollar bir xil bulmasligi kerak!', 404)
+    );
+  }
 
-  if (req.body.password || req.body.passwordConfirm) {
+  if (!req.body.oldPassword) {
+    return next(new AppError('Siz eski parolni kiritishingiz shart!', 401));
+  }
+
+  const user = await User.findById(req.user.id).select('+password');
+  console.log(user);
+  const tekshir = await bcrypt.compare(req.body.oldPassword, user.password);
+  if (!tekshir) {
+    return next(new AppError('Notugri eski parolni kiritdingiz!', 401));
+  }
+
+  // 2) Yangi parolni saqlaymiz.
+  if (req.body.newPassword != req.body.newPasswordConfirm) {
     return next(
       new AppError(
-        'You must not change password by this URL. Please change password url',
-        404
+        'Siz ikki xil parol kiritib quydingiz, Iltimos qayta tekshiring!',
+        401
       )
     );
   }
 
-  const user = await User.findById(req.user.id);
+  user.password = req.body.newPassword;
+  user.passwordConfirm = req.body.newPasswordConfirm;
+  user.passwordChangedDate = Date.now();
+  await user.save();
 
-  // 2) update user info
-  user.name = req.body.name || user.name;
-  user.email = req.body.email || user.email;
-  user.photo = req.file.filename || user.photo;
-  // 3) save info into database
-  const userUpdateInfo = await User.findByIdAndUpdate(req.user.id, user, {
-    new: true,
-    runValidators: true,
-  });
+  // 3) Yangi JWT berish
+  console.log('User:' + user);
+
+  const token = authController.createToken(user._id);
+
+  authController.saveTokenCookie(token, res, req);
 
   res.status(200).json({
     status: 'success',
-    message: 'Your data has been updated',
-    data: userUpdateInfo,
+    token: token,
+  });
+});
+
+const getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
+const updateMe = catchErrorAsync(async (req, res, next) => {
+  // 1) Malumotlarni yangilash
+  console.log(req.file);
+  console.log(req.body);
+
+  const user = await User.findById(req.user.id);
+
+  console.log(user);
+  user.name = req.body.name || user.name;
+  user.email = req.body.email || user.email;
+  user.photo = req.file.filename || user.photo;
+
+  const newUser = await user.save({ validateBeforeSave: false });
+
+  res.status(201).json({
+    status: 'success',
+    data: newUser,
   });
 });
 
 const deleteMe = catchErrorAsync(async (req, res, next) => {
-  //1)User update Active schema
-  await User.findByIdAndUpdate(req.user.id, { active: false });
+  // 1) User ni topamiz
 
-  res.status(200).json({
+  const user = await User.findById(req.user.id).select('active password');
+
+  // 2) Passwordni tekshirish
+  const tekshir = bcrypt.compare(req.body.password, user.password);
+
+  if (!tekshir) {
+    return next(new AppError('Siz parolni xato kiritdingiz!', 401));
+  }
+
+  user.active = false;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(204).json({
     status: 'success',
     data: null,
   });
@@ -113,10 +160,12 @@ module.exports = {
   getAllUsers,
   addUser,
   getUserById,
-  updateMe,
-  deleteUser,
-  deleteMe,
   updateUser,
-  uploadUserImage,
+  deleteUser,
+  updateMePassword,
+  updateMe,
+  deleteMe,
+  getMe,
+  uploadImage,
   resize,
 };

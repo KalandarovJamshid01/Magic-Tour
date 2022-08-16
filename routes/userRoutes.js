@@ -6,53 +6,34 @@ const router = express.Router();
 
 router.route('/signup').post(authController.signup);
 router.route('/signin').post(authController.login);
-
 router.route('/forgotpassword').post(authController.forgotPassword);
 router.route('/resetPassword/:token').post(authController.resetPassword);
-router
-  .route('/updatePassword')
-  .post(authController.protect, authController.updatePassword);
 
+// Middleware for all next route
+router.use(authController.protect);
+
+router.route('/updatePassword').post(authController.updatePassword);
+router.route('/updateMe').patch(userController.updateMe);
+router.route('/deleteMe').patch(userController.deleteMe);
+router.route('/updateMePassword').patch(userController.updateMePassword);
 router
-  .route('/updateMe/:id')
+  .route('/updateMeData')
   .patch(
-    authController.protect,
-    userController.uploadUserImage,
     userController.resize,
+    userController.uploadImage,
     userController.updateMe
   );
+router.route('/deleteMe').delete(userController.deleteMe);
+router.route('/getMe').get(userController.getMe, userController.getUserById);
+router.route('/logout').post(authController.logout);
 
-router
-  .route('/deleteMe')
-  .patch(authController.protect, userController.deleteMe);
-
-router
-  .route('/')
-  .get(
-    authController.protect,
-    authController.role(['admin', 'lead-guide', 'guide']),
-    userController.getAllUsers
-  )
-  .post(
-    authController.protect,
-    authController.role(['admin', 'lead-guide']),
-    userController.addUser
-  );
+router.route('/').get(userController.getAllUsers).post(userController.addUser);
 router
   .route('/:id')
-  .get(
-    authController.protect,
-    authController.role(['admin', 'lead-guide', 'guide']),
-    userController.getUserById
-  )
-  .patch(
-    authController.protect,
-    authController.role(['admin', 'lead-guide']),
-    userController.updateUser
-  )
+  .get(userController.getUserById)
+  .patch(authController.role(['admin', 'team-lead']), userController.updateUser)
   .delete(
-    authController.protect,
-    authController.role(['admin', 'lead-guide']),
+    authController.role(['admin', 'team-lead']),
     userController.deleteUser
   );
 

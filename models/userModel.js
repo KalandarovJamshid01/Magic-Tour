@@ -22,21 +22,21 @@ const userSchema = new mongoose.Schema({
   },
   photo: {
     type: String,
-    default: 'default.jpeg',
+    default: 'default.jpg',
   },
   role: {
     type: String,
-    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    enum: ['user', 'guide', 'team-lead', 'admin'],
     default: 'user',
   },
 
   password: {
     type: String,
     required: [true, 'Siz passwordni kiritishingiz shart'],
-    // validate: [
-    //   validator.isStrongPassword,
-    //   'Siz kuchliroq parolni kiritishingiz kerak',
-    // ],
+    validate: [
+      validator.isStrongPassword,
+      'Siz kuchliroq parolni kiritishingiz kerak',
+    ],
     select: false,
   },
   passwordConfirm: {
@@ -72,7 +72,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.pre(/^find/, function (next) {
+userSchema.pre(/^find/, async function (next) {
   this.find({ active: { $ne: false } });
   next();
 });

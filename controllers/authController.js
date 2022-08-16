@@ -12,90 +12,84 @@ const createToken = (id) => {
   });
 };
 
-const cookieOptions = {
-  maxAge: 60 * 10 * 1000,
-  httpOnly: true,
+const saveTokenCookie = (token, res, req) => {
+  res.cookie('jwt', token, {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: req.protocol === 'https' ? true : false,
+  });
 };
 
-if (process.env.NODE_ENV === 'PRODUCTION') {
-  cookieOptions.secure = true;
-}
+const signup = catchErrorAsync(async (req, res, next) => {
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    photo: req.body.photo,
+    passwordConfirm: req.body.passwordConfirm,
+    passwordChangedDate: req.body.passwordChangedDate,
+  });
 
-const saveTokenCookie = (res, token) => {
-  res.cookie('jwt', token, cookieOptions);
-};
+  const token = createToken(newUser._id);
 
-const signup = async (req, res, next) => {
-  try {
-    const newUser = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      photo: req.body.photo,
-      passwordConfirm: req.body.passwordConfirm,
-      passwordChangedDate: req.body.passwordChangedDate,
-    });
-    const token = createToken(newUser._id);
-    saveTokenCookie(res, token);
-    res.status(200).json({
-      status: 'success',
-      token: token,
-      data: newUser,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'success',
-      err: err,
-    });
-  }
+  saveTokenCookie(token, res, req);
+
+  res.status(200).json({
+    status: 'success',
+    token: token,
+    data: newUser,
+  });
+});
+
+const logout = (req, res, next) => {
+  res.cookie('jwt', 'loggedOut', {
+    httpOnly: true,
+  });
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 const login = async (req, res, next) => {
-  try {
-    // 1) Email bilan password borligini tekshirish
+  // 1) Email bilan password borligini tekshirish
 
-    const { email, password } = { ...req.body };
+  const { email, password } = { ...req.body };
 
-    if (!email || !password) {
-      return next(new AppError('Email yoki passwordni kiriting! Xato!!!', 401));
-    }
-
-    // 2) Shunaqa odam bormi yuqmi shuni tekshirish
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) {
-      return next(
-        new AppError('Bunday user mavjud emas. Iltimos royxatdan uting!', 404)
-      );
-    }
-
-    // 3) password tugri yokin notugriligini tekshirish
-    const tekshirHashga = async (oddiyPassword, hashPassword) => {
-      const tekshir = await bcrypt.compare(oddiyPassword, hashPassword);
-      return tekshir;
-    };
-
-    if (!(await tekshirHashga(password, user.password))) {
-      return next(
-        new AppError(
-          'Sizning parol yoki loginingiz xato! Iltimos qayta urinib kuring!',
-          401
-        )
-      );
-    }
-    // 4) JWT token yasab berish
-    const token = createToken(user._id);
-    saveTokenCookie(res, token);
-    // 5) Response qaytarish
-    res.status(200).json({
-      status: 'success',
-      token: token,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      err: err,
-    });
+  if (!email || !password) {
+    return next(new AppError('Email yoki passwordni kiriting! Xato!!!', 401));
   }
+
+  // 2) Shunaqa odam bormi yuqmi shuni tekshirish
+  const user = await User.findOne({ email: email }).select('+password');
+  if (!user) {
+    return next(
+      new AppError('Bunday user mavjud emas. Iltimos royxatdan uting!', 404)
+    );
+  }
+
+  // 3) password tugri yokin notugriligini tekshirish
+  const tekshirHashga = async (oddiyPassword, hashPassword) => {
+    const tekshir = await bcrypt.compare(oddiyPassword, hashPassword);
+    return tekshir;
+  };
+
+  if (!(await tekshirHashga(password, user.password))) {
+    return next(
+      new AppError(
+        'Sizning parol yoki loginingiz xato! Iltimos qayta urinib kuring!',
+        401
+      )
+    );
+  }
+  // 4) JWT token yasab berish
+  const token = createToken(user._id);
+
+  saveTokenCookie(token, res, req);
+  // 5) Response qaytarish
+  res.status(200).json({
+    status: 'success',
+    token: token,
+  });
 };
 
 const protect = catchErrorAsync(async (req, res, next) => {
@@ -106,6 +100,8 @@ const protect = catchErrorAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
   if (!token) {
     return next(new AppError('Siz tizimga kirishingiz shart!'));
@@ -114,7 +110,7 @@ const protect = catchErrorAsync(async (req, res, next) => {
 
   const tokencha = jwt.verify(token, process.env.JWT_SECRET);
 
-  // console.log(tokencha);
+  console.log(tokencha);
   // 3) Token ichidan idni olib databasedagi userni topamiz.
   const user = await User.findById(tokencha.id);
 
@@ -130,7 +126,7 @@ const protect = catchErrorAsync(async (req, res, next) => {
   // 4) Agar parol uzgargan bulsa tokeni amal qilmasligini tekshirish
   if (user.passwordChangedDate) {
     console.log(user.passwordChangedDate.getTime() / 1000);
-    // console.log(tokencha.iat);
+    console.log(tokencha.iat);
     if (user.passwordChangedDate.getTime() / 1000 > tokencha.iat) {
       return next(
         new AppError(
@@ -140,9 +136,48 @@ const protect = catchErrorAsync(async (req, res, next) => {
       );
     }
   }
+
   req.user = user;
+  res.locals.user = user;
   next();
 });
+
+const isLoggedIn = async (req, res, next) => {
+  try {
+    console.log(req.cookies.jwt);
+    if (req.cookies.jwt) {
+      let token = req.cookies.jwt;
+      if (!token) {
+        return next();
+      }
+      // 2) Token ni tekshirish Serverniki bilan clientnikini solishtirish
+
+      const tokencha = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 3) Token ichidan idni olib databasedagi userni topamiz.
+      const user = await User.findById(tokencha.id);
+      if (!user) {
+        return next();
+      }
+
+      // 4) Agar parol uzgargan bulsa tokeni amal qilmasligini tekshirish
+      if (user.passwordChangedDate) {
+        if (user.passwordChangedDate.getTime() / 1000 > tokencha.iat) {
+          return next();
+        }
+      }
+
+      res.locals.user = user;
+      res.user = user;
+      console.log(user);
+      return next();
+    }
+
+    next();
+  } catch (err) {
+    return next();
+  }
+};
 
 const role = (roles) => {
   return catchErrorAsync(async (req, res, next) => {
@@ -175,6 +210,7 @@ const forgotPassword = catchErrorAsync(async (req, res, next) => {
   // 3) ResetToken yaratish
 
   const token = user.hashTokenMethod();
+
   await user.save({ validateBeforeSave: false });
 
   // 4) Email ga junatish resetToken ni
@@ -237,7 +273,9 @@ const resetPassword = catchErrorAsync(async (req, res, next) => {
 
   // 4) JWT yuboramiz
   const tokenJWT = createToken(user._id);
-  saveTokenCookie(res, tokenJWT);
+
+  saveTokenCookie(token, res, req);
+
   res.status(200).json({
     status: 'success',
     token: tokenJWT,
@@ -277,7 +315,7 @@ const updatePassword = catchErrorAsync(async (req, res, next) => {
   // 4) send JWT token
 
   const token = createToken(user._id);
-  saveTokenCookie(res, token);
+  saveTokenCookie(res, tokenJWT);
   res.status(200).json({
     status: 'success',
     token: token,
@@ -292,5 +330,9 @@ module.exports = {
   role,
   forgotPassword,
   resetPassword,
+  createToken,
   updatePassword,
+  isLoggedIn,
+  logout,
+  saveTokenCookie,
 };

@@ -1,8 +1,17 @@
-const router = require('express').Router();
+const express = require('express');
 const viewController = require('./../controllers/viewController');
+const authController = require('./../controllers/authController');
 
-router.route('/').get(viewController.getAllTour);
-router.route('/overview').get(viewController.getAllTour);
-router.route('/tour/:id').get(viewController.getOneTour);
-router.route('/login').get(viewController.login);
+const router = express.Router();
+
+router.get('/', viewController.getAllTours);
+router.get('/tour/:id', authController.isLoggedIn, viewController.getOneTour);
+router.get('/login', authController.isLoggedIn, viewController.login);
+router.get('/me', authController.protect, viewController.account);
+router.post(
+  '/submit-form-data',
+  authController.protect,
+  viewController.submitData
+);
+
 module.exports = router;

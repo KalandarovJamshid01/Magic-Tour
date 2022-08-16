@@ -1,91 +1,93 @@
-const catchErrorAsync = require('./../utility/catchAsync');
-const AppError = require('./../utility/appError');
-const FeatureApi = require('./../utility/featureApi');
+const AppError = require('../utility/appError');
+const catchAsyncError = require('./../utility/catchAsync');
+const FeatureAPI = require('../utility/featureApi');
 
-const responseFunc = (res, statusCode, data) => {
-  if (Array.isArray(data)) {
-    res.status(statusCode).json({
+const deleteOne = (Model) => {
+  return catchAsyncError(async (req, res, next) => {
+    const doc = await Model.findByIdAndDelete(req.params.id);
+    if (!doc) {
+      return next(new AppError('Document was not found with that ID', 404));
+    }
+
+    res.status(200).json({
       status: 'success',
-      result: data.length,
-      data: data,
+      message: 'This document has been deleted',
     });
-  } else {
-    res.status(statusCode).json({
-      status: 'success',
-      data: data,
-    });
-  }
+  });
 };
 
-const getAll = catchErrorAsync(
-  async (req, res, next, Model, options, options2, dataOption) => {
-    let datas;
-    let filter = new FeatureApi(req.query, Model)
+const updateOne = (Model) => {
+  return catchAsyncError(async (req, res, next) => {
+    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!doc) {
+      return next(new AppError('Document was not found with that ID', 404));
+    }
+    res.status(201).json({
+      status: 'success',
+      data: doc,
+    });
+  });
+};
+
+const addOne = (Model) => {
+  return catchAsyncError(async (req, res) => {
+    const data = req.body;
+    const doc = await Model.create(data);
+    res.status(200).json({
+      status: 'success',
+      data: doc,
+    });
+  });
+};
+
+const getOne = (Model, populatePath) => {
+  return catchAsyncError(async (req, res, next) => {
+    let doc;
+    if (populatePath) {
+      doc = await Model.findById(req.params.id).populate(populatePath);
+    } else {
+      doc = await Model.findById(req.params.id);
+    }
+
+    if (!doc) {
+      return next(new AppError('Document not found with that ID', 404));
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: doc,
+    });
+  });
+};
+
+const getAll = (Model) => {
+  return catchAsyncError(async (req, res) => {
+    let filter = {};
+    if (req.params.tourId) {
+      filter = { tour: req.params.tourId };
+    }
+
+    const query = new FeatureAPI(req.query, Model)
       .filter()
       .sorting()
       .field()
       .pagination();
 
-    if (options) {
-      if (!options2) {
-        datas = await filter.databaseQuery.populate(options);
-      } else {
-        datas = await filter.databaseQuery
-          .populate(options)
-          .populate(options2)
-          // .explain();
-      }
-    } else {
-      datas = await filter.databaseQuery;
-    }
-    responseFunc(res, 200, datas);
-  }
-);
+    const doc = query.databaseQuery;
 
-const getOne = catchErrorAsync(
-  async (req, res, next, Model, options, options2) => {
-    let data;
-    if (options) {
-      if (!options2) {
-        data = await Model.findById(req.params.id).populate(options);
-      } else {
-        data = await Model.findById(req.params.id)
-          .populate(options)
-          .populate(options2);
-      }
-    } else {
-      data = await Model.findById(req.params.id);
-    }
-    responseFunc(res, 200, data);
-  }
-);
+    // Indexes
+    // const data = await doc.find(filter).explain();
 
-const add = catchErrorAsync(async (req, res, next, Model) => {
-  const data = await Model.create(req.body);
-  responseFunc(res, 201, data);
-});
-
-const update = catchErrorAsync(async (req, res, next, Model) => {
-  const data = await Model.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    validator: true,
+    const data = await doc.find(filter);
+    res.status(200).json({
+      status: 'success',
+      results: data.length,
+      data: data,
+    });
   });
-
-  if (!data) {
-    return next(new AppError('Not Found This ID', 404));
-  }
-  responseFunc(res, 202, data);
-});
-
-const deleteData = catchErrorAsync(async (req, res, next, Model) => {
-  const data = await Model.findByIdAndDelete(req.params.id);
-  responseFunc(res, 204, data);
-});
-
-module.exports = {
-  getAll,
-  getOne,
-  add,
-  update,
-  deleteData,
 };
+
+module.exports = { deleteOne, updateOne, addOne, getOne, getAll };
