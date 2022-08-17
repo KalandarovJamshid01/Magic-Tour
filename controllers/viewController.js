@@ -1,12 +1,13 @@
 const User = require('../models/userModel');
 const AppError = require('../utility/appError');
-const catchErrorAsync = require('../utility/catchAsync');
+const catchErrorAsync = require('../utility/catchErrorAsync');
 const Tour = require('./../models/tourModel');
 
 const getAllTours = catchErrorAsync(async (req, res) => {
   // 1) Get all tours
   const tours = await Tour.find();
 
+  console.log(tours);
   if (!tours) {
     res.status(404).render('error', {});
   }

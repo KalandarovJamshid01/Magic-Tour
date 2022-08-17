@@ -54,7 +54,8 @@ const login = async (req, res, next) => {
   // 1) Email bilan password borligini tekshirish
 
   const { email, password } = { ...req.body };
-
+  console.log('hello');
+  console.log(email, password);
   if (!email || !password) {
     return next(new AppError('Email yoki passwordni kiriting! Xato!!!', 401));
   }
@@ -172,7 +173,6 @@ const isLoggedIn = async (req, res, next) => {
       console.log(user);
       return next();
     }
-
     next();
   } catch (err) {
     return next();

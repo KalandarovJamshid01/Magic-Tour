@@ -1,5 +1,5 @@
 const AppError = require('../utility/appError');
-const catchAsyncError = require('./../utility/catchAsync');
+const catchAsyncError = require('./../utility/catchErrorAsync');
 const FeatureAPI = require('../utility/featureApi');
 
 const deleteOne = (Model) => {

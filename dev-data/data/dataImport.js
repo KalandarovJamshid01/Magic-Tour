@@ -51,4 +51,5 @@ const deleteData = async () => {
   }
 };
 // deleteData();
-// addData();
+addData();
+

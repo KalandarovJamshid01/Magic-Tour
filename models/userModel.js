@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'guide', 'team-lead', 'admin'],
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
     default: 'user',
   },
 
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
   },
   passwordConfirm: {
     type: String,
-    required: [true, 'Siz passwordni kiritishingiz shart'],
+    // required: [true, 'Siz passwordni kiritishingiz shart'],
     validate: {
       validator: function (val) {
         return val === this.password;
@@ -62,32 +62,32 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  const hashPassword = await bcrypt.hash(this.password, 12);
-  this.password = hashPassword;
-  this.passwordConfirm = undefined;
-  next();
-});
+// userSchema.pre('save', async function (next) {
+//   if (!this.isModified('password')) {
+//     return next();
+//   }
+//   const hashPassword = await bcrypt.hash(this.password, 12);
+//   this.password = hashPassword;
+//   this.passwordConfirm = undefined;
+//   next();
+// });
 
-userSchema.pre(/^find/, async function (next) {
-  this.find({ active: { $ne: false } });
-  next();
-});
+// userSchema.pre(/^find/, async function (next) {
+//   this.find({ active: { $ne: false } });
+//   next();
+// });
 
-userSchema.methods.hashTokenMethod = function () {
-  const token = crypto.randomBytes(32).toString('hex');
+// userSchema.methods.hashTokenMethod = function () {
+//   const token = crypto.randomBytes(32).toString('hex');
 
-  const hashToken = crypto.createHash('sha256').update(token).digest('hex');
+//   const hashToken = crypto.createHash('sha256').update(token).digest('hex');
 
-  this.resetTokenHash = hashToken;
+//   this.resetTokenHash = hashToken;
 
-  this.resetTokenVaqti = Date.now() + 10 * 60 * 1000;
+//   this.resetTokenVaqti = Date.now() + 10 * 60 * 1000;
 
-  return token;
-};
+//   return token;
+// };
 
 const User = mongoose.model('users', userSchema);
 

@@ -14,7 +14,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const { urlencoded } = require('express');
-
+const cors = require('cors');
 const app = express();
 
 app.set('view engine', 'pug');
@@ -27,7 +27,7 @@ app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
 app.use(urlencoded({ limit: '10kb' }));
 app.use(cookieParser());
-
+app.use(cors());
 app.use(sanitize());
 
 app.use(xss());
